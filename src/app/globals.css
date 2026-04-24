@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #0a0a0f;
+  --color-foreground: #ffffff;
+  --color-muted: #8b8b99;
+  --color-accent: #6c5ce7;
+  --color-accent-glow: rgba(108, 92, 231, 0.4);
+  --color-glass-bg: rgba(255, 255, 255, 0.03);
+  --color-glass-border: rgba(255, 255, 255, 0.08);
+}
+
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  }
+}
+
+.glass-card {
+  background: var(--color-glass-bg);
+  border: 1px solid var(--color-glass-border);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Markdown Styling */
+.markdown-body {
+  color: #d1d1d6;
+}
+
+.markdown-body h1, .markdown-body h2, .markdown-body h3 {
+  color: white;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+  font-family: var(--font-outfit), sans-serif;
+}
+
+.markdown-body h1 {
+  font-size: 2.5rem;
+  margin-top: 0;
+  background: linear-gradient(to right, #fff, #a29bfe);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.markdown-body p { margin-bottom: 1.2rem; }
+.markdown-body strong { color: white; font-weight: 600; }
+.markdown-body ul, .markdown-body ol { margin-bottom: 1.2rem; padding-left: 1.5rem; }
+.markdown-body li { margin-bottom: 0.5rem; }
+.markdown-body pre { background: rgba(0,0,0,0.5); padding: 1rem; border-radius: 8px; overflow-x: auto; margin-bottom: 1.2rem; border: 1px solid var(--color-glass-border);}
+.markdown-body code { font-family: monospace; color: #a29bfe; background: rgba(108, 92, 231, 0.1); padding: 0.2rem 0.4rem; border-radius: 4px; }
