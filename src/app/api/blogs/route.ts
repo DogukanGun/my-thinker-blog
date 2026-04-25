@@ -36,7 +36,7 @@ export async function GET() {
     const result = await db.query(
       "SELECT * FROM blogs ORDER BY created_at DESC"
     );
-    return NextResponse.json(result.rows);
+    return NextResponse.json({ blogs: result.rows });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
     console.error("[/api/blogs] DB error:", message);
