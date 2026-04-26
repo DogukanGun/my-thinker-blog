@@ -18,6 +18,58 @@ type Blog = {
   created_at: string;
 };
 
+// Strip markdown for the card-body preview: drop the leading H1 (which
+// duplicates the card title), then pull the first paragraph and remove
+// common inline markers so the snippet reads as plain prose.
+function previewMd(md: string, max = 180): string {
+  if (!md) return "";
+  const lines = md.split("\n");
+  // Skip a leading "# Heading" line (and any blank lines after it).
+  let i = 0;
+  while (i < lines.length && (lines[i].trim() === "" || /^#{1,6}\s/.test(lines[i].trim()))) {
+    i++;
+  }
+  // Take the first non-empty paragraph.
+  const para: string[] = [];
+  while (i < lines.length && lines[i].trim() !== "") {
+    para.push(lines[i]);
+    i++;
+  }
+  let text = para.join(" ");
+  // Strip common inline markdown: **bold**, *italic*, `code`, [link](url), images.
+  text = text
+    .replace(/!\[[^\]]*]\([^)]*\)/g, "")
+    .replace(/\[([^\]]+)]\([^)]*\)/g, "$1")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/__([^_]+)__/g, "$1")
+    .replace(/\*([^*]+)\*/g, "$1")
+    .replace(/_([^_]+)_/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim();
+  return text.length > max ? text.slice(0, max).trimEnd() + "…" : text;
+}
+
+// Pick a category tag for a blog from its title + content. Cheap keyword
+// match; first hit wins. Order matters — most specific categories first.
+const TAG_RULES: { tag: string; patterns: RegExp[] }[] = [
+  { tag: "Sport", patterns: [/\b(f1|formula\s*1|race[\s-]?car|motorsport|wing|downforce|aerodynamic|drag\b|nascar|le\s*mans)/i] },
+  { tag: "Audio", patterns: [/\b(voice|accent|speech|tts|asr|phoneme|prosody|voicebox|whisper)/i] },
+  { tag: "Environment", patterns: [/\b(co2|co₂|carbon|climate|weathering|olivine|emission|sequestration|biodiversity|ecosystem)/i] },
+  { tag: "Deep Learning", patterns: [/\b(quantization|compression|llm|transformer|attention|distillation|fine[\s-]?tun(ing|e)|pruning|adapter|lora\b)/i] },
+  { tag: "AI", patterns: [/\b(agent|agentic|reinforcement\s*learning|machine\s*learning|neural\s*network|gpt|claude|gemini|chatgpt)/i] },
+  { tag: "Health", patterns: [/\b(protein|nutrition|metabolic|microbiome|gut|whey|amino|cardiovascular|insulin)/i] },
+  { tag: "Tech", patterns: [/\b(cloud|kubernetes|database|api|web|systems?|infrastructure)/i] },
+];
+
+function tagFor(blog: Blog): string {
+  const haystack = `${blog.title}\n${blog.content_md.slice(0, 800)}`;
+  for (const { tag, patterns } of TAG_RULES) {
+    if (patterns.some((re) => re.test(haystack))) return tag;
+  }
+  return "Research";
+}
+
 export default function Home() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -110,14 +162,21 @@ export default function Home() {
                  onMouseEnter={(e) => e.currentTarget.style.borderColor = `${config.accentColor}80`}
                  onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--color-glass-border)'}>
               <div className="flex justify-between items-center mb-4 text-xs font-semibold">
-                <span className="px-3 py-1 rounded-full" style={{ backgroundColor: `${config.accentColor}30`, color: config.accentColor }}>{t("TAG_RESEARCH")}</span>
+                <span className="flex items-center gap-2">
+                  <span className="px-3 py-1 rounded-full" style={{ backgroundColor: `${config.accentColor}30`, color: config.accentColor }}>{tagFor(blog)}</span>
+                  {blog.arxiv_url && (
+                    <span className="px-2 py-1 rounded-full bg-white/5 border border-white/10 text-[#8b8b99] flex items-center gap-1" title="Paper available">
+                      <FileText size={11} /> Paper
+                    </span>
+                  )}
+                </span>
                 <span className="text-[#8b8b99]">
                   {new Date(blog.created_at).toLocaleDateString(language === 'tr' ? 'tr-TR' : language === 'de' ? 'de-DE' : 'en-US', { month: "long", day: "numeric", year: "numeric" })}
                 </span>
               </div>
               <h2 className="text-2xl font-bold mb-3 leading-tight font-[family-name:var(--font-outfit)]">{blog.title}</h2>
               <p className="text-[#8b8b99] mb-6 flex-grow line-clamp-3">
-                {blog.content_md.substring(0, 150)}...
+                {previewMd(blog.content_md)}
               </p>
               <button 
                 onClick={() => setSelectedBlog(blog)}
