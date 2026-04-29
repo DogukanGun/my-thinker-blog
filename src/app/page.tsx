@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
 import { BookOpen, FileText, Code, X, Globe } from "lucide-react";
@@ -121,19 +122,28 @@ export default function Home() {
                {config.siteName.substring(Math.ceil(config.siteName.length/2))}
             </span>
           </div>
-          
-          {/* Language Switcher */}
-          <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5">
-            <Globe size={16} className="text-muted" />
-            <select 
-              value={language} 
-              onChange={(e) => setLanguage(e.target.value as LanguageCode)}
-              className="bg-transparent text-sm font-semibold outline-none cursor-pointer text-white appearance-none"
+
+          <div className="flex items-center gap-4">
+            <Link
+              href="/manifesto"
+              className="text-sm font-semibold text-[#8b8b99] hover:text-white transition-colors"
             >
-              <option value="en" className="text-black">English</option>
-              <option value="de" className="text-black">Deutsch</option>
-              <option value="tr" className="text-black">Türkçe</option>
-            </select>
+              Manifesto
+            </Link>
+
+            {/* Language Switcher */}
+            <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5">
+              <Globe size={16} className="text-muted" />
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value as LanguageCode)}
+                className="bg-transparent text-sm font-semibold outline-none cursor-pointer text-white appearance-none"
+              >
+                <option value="en" className="text-black">English</option>
+                <option value="de" className="text-black">Deutsch</option>
+                <option value="tr" className="text-black">Türkçe</option>
+              </select>
+            </div>
           </div>
         </div>
       </header>
